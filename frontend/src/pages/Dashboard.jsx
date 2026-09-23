@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import api from "../api";
 
 function formatTime(totalSeconds) {
@@ -7,26 +8,37 @@ function formatTime(totalSeconds) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+function formatHour(h) {
+  const suffix = h < 12 ? "AM" : "PM";
+  const display = h % 12 === 0 ? 12 : h % 12;
+  return `${display} ${suffix}`;
+}
+
 export default function Dashboard() {
   const [taskName, setTaskName] = useState("");
   const [plannedMinutes, setPlannedMinutes] = useState(45);
   const [sessions, setSessions] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [active, setActive] = useState(null);
   const [elapsed, setElapsed] = useState(0);
   const [showRating, setShowRating] = useState(false);
   const [error, setError] = useState("");
   const timerRef = useRef(null);
 
-  const fetchSessions = async () => {
+  const refresh = async () => {
     try {
-      const res = await api.get("/users/1/sessions/");
-      setSessions(res.data);
+      const [sRes, aRes] = await Promise.all([
+        api.get("/users/1/sessions/"),
+        api.get("/users/1/analytics/"),
+      ]);
+      setSessions(sRes.data);
+      setAnalytics(aRes.data);
     } catch {
-      setError("Failed to load sessions. Is the backend running on port 8000?");
+      setError("Failed to load data. Is the backend running on port 8000?");
     }
   };
 
-  useEffect(() => { fetchSessions(); }, []);
+  useEffect(() => { refresh(); }, []);
 
   useEffect(() => {
     if (active) {
@@ -64,7 +76,7 @@ export default function Dashboard() {
     setActive(null);
     setShowRating(false);
     setElapsed(0);
-    fetchSessions();
+    refresh();
   };
 
   const abandonSession = async () => {
@@ -80,7 +92,7 @@ export default function Dashboard() {
     }
     setActive(null);
     setElapsed(0);
-    fetchSessions();
+    refresh();
   };
 
   const progress = active
@@ -91,10 +103,10 @@ export default function Dashboard() {
     <div className="container">
       <header>
         <h1>FocusRing <span className="ai">AI</span></h1>
-        <p className="subtitle">Adaptive Study & Focus Assistant</p>
+        <p className="subtitle">Adaptive Study &amp; Focus Assistant</p>
       </header>
 
-      {error && <div className="error">{error}</div>}
+      {error ? <div className="error">{error}</div> : null}
 
       {!active ? (
         <form className="card" onSubmit={startSession}>
@@ -146,6 +158,56 @@ export default function Dashboard() {
           )}
         </div>
       )}
+
+      <section className="card">
+        <h2>Focus Analytics</h2>
+        {analytics ? (
+          <>
+            <div className="stats-grid">
+              <div className="stat-tile">
+                <div className="stat-value">
+                  {Math.floor(analytics.total_focus_minutes / 60)}h {analytics.total_focus_minutes % 60}m
+                </div>
+                <div className="stat-label">Total Focus</div>
+              </div>
+              <div className="stat-tile">
+                <div className="stat-value">{analytics.avg_session_minutes}m</div>
+                <div className="stat-label">Avg Session</div>
+              </div>
+              <div className="stat-tile">
+                <div className="stat-value">{analytics.completion_rate}%</div>
+                <div className="stat-label">Completion Rate</div>
+              </div>
+              <div className="stat-tile">
+                <div className="stat-value">{analytics.avg_focus_score}/5</div>
+                <div className="stat-label">Avg Focus Score</div>
+              </div>
+            </div>
+            <p className="muted">
+              Best focus time: {analytics.best_focus_hour !== null ? formatHour(analytics.best_focus_hour) : "not enough data yet"}
+            </p>
+            {analytics.daily.some((d) => d.minutes > 0) ? (
+              <div className="chart-box">
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={analytics.daily}>
+                    <XAxis dataKey="date" stroke="#8b949e" />
+                    <YAxis stroke="#8b949e" allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{ background: "#161b22", border: "1px solid #30363d", borderRadius: 8 }}
+                      formatter={(value) => [`${value} min`, "Focus"]}
+                    />
+                    <Bar dataKey="minutes" fill="#7c3aed" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="muted">No focus minutes in the last 7 days yet.</p>
+            )}
+          </>
+        ) : (
+          <p className="muted">Loading analytics?</p>
+        )}
+      </section>
 
       <section className="card">
         <h2>Session History</h2>
