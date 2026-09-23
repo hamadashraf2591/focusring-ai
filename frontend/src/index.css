@@ -399,3 +399,116 @@ html { scroll-behavior: smooth; }
 .ach-progress { height: 5px; background: var(--track); border-radius: 3px; overflow: hidden; }
 .ach-progress div { height: 100%; background: var(--accent); }
 .ach-progress small { display: block; margin-top: 0.28rem; font-size: 0.62rem; color: var(--muted); }
+/* TECH MARQUEE */
+.marquee-section {
+  margin: 1.1rem 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.1rem 0 1.3rem;
+  box-shadow: var(--shadow);
+}
+.marquee-heading {
+  text-align: center;
+  margin: 0 0 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.marquee-wrap {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+.marquee-wrap:hover .marquee { animation-play-state: paused; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.tech-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 0.8rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tech-item .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+/* DEV CARD */
+.dev-card { display: flex; align-items: center; gap: 1rem; }
+.dev-avatar {
+  width: 62px; height: 62px; flex: 0 0 62px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: var(--accent-ink);
+  font-weight: 900; font-size: 1.35rem; letter-spacing: 0.5px;
+  box-shadow: 0 0 26px var(--accent-soft);
+}
+.dev-name { font-weight: 900; font-size: 1.08rem; letter-spacing: -0.2px; }
+.dev-role { color: var(--muted); font-size: 0.82rem; margin: 0.1rem 0 0.55rem; }
+.dev-links { display: flex; gap: 0.5rem; }
+.dev-links a {
+  display: inline-block;
+  padding: 0.28rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: border-color 0.2s, color 0.2s;
+}
+.dev-links a:hover { border-color: var(--accent); color: var(--accent); }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+@media (max-width: 720px) { .fb-right { display: none; } }
+/* TECH CARDS (marquee 2.0) */
+.tech-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-right: 0.9rem;
+  padding: 0.6rem 1.2rem 0.6rem 0.6rem;
+  border-radius: 14px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.tech-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.tech-icon {
+  width: 42px; height: 42px; flex: 0 0 42px;
+  border-radius: 11px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 0.78rem;
+  border: 1px solid transparent;
+}
+.tech-meta { display: flex; flex-direction: column; line-height: 1.3; text-align: left; }
+.tech-meta strong { font-size: 0.92rem; font-weight: 800; letter-spacing: -0.2px; }
+.tech-meta small {
+  font-size: 0.64rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.7px;
+}

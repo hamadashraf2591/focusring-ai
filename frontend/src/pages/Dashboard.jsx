@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import FocusRing from "../components/FocusRing";
 import Hero from "../components/Hero";
 import BreakLounge from "../components/BreakLounge";
 import Achievements from "../components/Achievements";
+import TechMarquee from "../components/TechMarquee";
+import SiteFooter from "../components/SiteFooter";
 import api from "../api";
 
 const QUOTES = [
@@ -659,7 +661,9 @@ export default function Dashboard() {
           )}
         </section>
 
-        <section className="card hide-in-zen">
+        <TechMarquee />
+
+<section className="card hide-in-zen">
           <h2>Session History</h2>
           {sessions.length === 0 ? (
             <p className="muted">No sessions yet. Start your first one above!</p>
@@ -696,38 +700,7 @@ export default function Dashboard() {
         </section>
       </div>
 
-      <footer className="site-footer hide-in-zen">
-        <div className="footer-grid">
-          <div>
-            <div className="nav-brand" style={{ marginBottom: "0.5rem" }}>
-              <span className="logo-dot" /> FocusRing <span className="ai">AI</span>
-            </div>
-            <p>
-              An adaptive study assistant that predicts focus drops from your real
-              behavior - built with FastAPI, React and scikit-learn.
-            </p>
-          </div>
-          <div>
-            <h4>Jump to</h4>
-            <a href="#how">How it works</a>
-            <a href="#lounge">Break Lounge</a>
-            <a href="#achievements">Achievements</a>
-            <a href="#analytics">Analytics</a>
-          </div>
-          <div>
-            <h4>Stack</h4>
-            <p>
-              React + Vite<br />
-              FastAPI + SQLAlchemy<br />
-              scikit-learn Logistic Regression<br />
-              Recharts
-            </p>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          FocusRing AI - built by Hammad - {new Date().getFullYear()}
-        </div>
-      </footer>
+      <SiteFooter />
 
       {aiOpen ? (
         <div className="modal-overlay" onClick={() => setAiOpen(false)}>
@@ -777,3 +750,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
