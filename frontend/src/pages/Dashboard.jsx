@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import api from "../api";
 
@@ -207,7 +207,7 @@ export default function Dashboard() {
               <span className={"risk-chip " + prediction.level}>
                 {prediction.focus_risk_percent}%
               </span>{" "}
-              <span className="muted">? {prediction.recommendation}</span>
+              <span className="muted">- {prediction.recommendation}</span>
             </p>
           ) : null}
           <button type="submit" className="primary">Start Focus</button>
@@ -229,7 +229,7 @@ export default function Dashboard() {
           {breakSuggestion ? (
             <div className="risk-banner">
               <p>
-                Focus risk at <strong>{breakSuggestion.focus_risk_percent}%</strong> ?
+                Focus risk at <strong>{breakSuggestion.focus_risk_percent}%</strong> -
                 based on your session pattern, a break now would help.
               </p>
               <div className="timer-actions">
@@ -306,7 +306,7 @@ export default function Dashboard() {
             )}
           </>
         ) : (
-          <p className="muted">Loading analytics?</p>
+          <p className="muted">Loading analytics...</p>
         )}
       </section>
 
@@ -348,3 +348,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
