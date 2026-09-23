@@ -11,6 +11,16 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
+def update_user(db: Session, user_id: int, updates: schemas.UserUpdate):
+    db_user = get_user(db, user_id)
+    if not db_user:
+        return None
+    for key, value in updates.model_dump(exclude_unset=True).items():
+        setattr(db_user, key, value)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
 def create_session(db: Session, session: schemas.SessionCreate, user_id: int):
     db_session = models.FocusSession(**session.model_dump(), user_id=user_id)
     db.add(db_session)

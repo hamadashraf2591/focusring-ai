@@ -2,9 +2,9 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .routers import users, sessions, analytics, predict
+from .routers import users, sessions, analytics, predict, breaks
 
-app = FastAPI(title="FocusRing AI API", version="0.6.0")
+app = FastAPI(title="FocusRing AI API", version="0.7.0")
 
 _origins = os.getenv(
     "CORS_ORIGINS",
@@ -27,6 +27,7 @@ app.include_router(users.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(predict.router, prefix="/api")
+app.include_router(breaks.router, prefix="/api")
 
 @app.get("/")
 def root():
