@@ -25,3 +25,7 @@ Thumbs.db
 ml/models/
 ml/datasets/
 *.pkl
+
+# Database
+*.db
+*.sqlite*
