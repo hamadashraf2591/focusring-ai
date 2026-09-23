@@ -334,3 +334,68 @@ html { scroll-behavior: smooth; }
 .footer-grid a { display: block; text-decoration: none; }
 .footer-grid a:hover { color: var(--accent); }
 .footer-bottom { text-align: center; padding: 1rem; color: var(--muted); font-size: 0.76rem; border-top: 1px solid var(--border); }
+/* CLICKABLE STEPS */
+.step-card { cursor: pointer; }
+.step-cta { display: inline-block; margin-top: 0.55rem; color: var(--accent); font-weight: 800; font-size: 0.78rem; letter-spacing: 0.3px; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem; animation: fadeUp 0.2s ease both;
+}
+.modal {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; max-width: 540px; width: 100%;
+  padding: 1.6rem; box-shadow: var(--shadow);
+  position: relative; max-height: 85vh; overflow: auto;
+}
+.modal h3 { font-size: 1.25rem; margin: 0 0 0.4rem; }
+.modal-close {
+  position: absolute; top: 0.8rem; right: 0.8rem;
+  width: 32px; height: 32px; padding: 0; border-radius: 50%;
+}
+.metric-row { display: flex; gap: 0.6rem; margin: 1rem 0; }
+.metric-box {
+  flex: 1; background: var(--card2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 0.75rem; text-align: center;
+}
+.metric-box strong { display: block; font-size: 1.2rem; font-weight: 900; color: var(--accent); }
+.metric-box span { font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.modal ul { margin: 0.5rem 0 0; padding-left: 1.15rem; color: var(--muted); font-size: 0.88rem; line-height: 1.75; }
+.modal ul strong { color: var(--text); }
+
+/* ACHIEVEMENTS */
+.ach-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.xp-chip {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 0.3rem 0.8rem;
+  font-size: 0.76rem; font-weight: 700;
+}
+.xp-chip .lvl { color: var(--accent); }
+.xp-chip.big { border-radius: 12px; padding: 0.45rem 0.9rem; }
+.xp-bar { width: 110px; height: 6px; background: var(--track); border-radius: 3px; overflow: hidden; }
+.xp-bar div { height: 100%; background: var(--accent); transition: width 0.5s ease; }
+.xp-chip small { color: var(--muted); font-weight: 500; }
+
+.ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 0.7rem; margin-top: 1rem; }
+.ach-card {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 0.95rem 0.85rem; text-align: center;
+  opacity: 0.5; transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
+}
+.ach-card.unlocked {
+  opacity: 1; border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-soft);
+}
+.ach-card.unlocked:hover { transform: translateY(-3px); }
+.ach-icon { font-size: 1.7rem; margin-bottom: 0.3rem; }
+.ach-card strong { display: block; font-size: 0.86rem; }
+.ach-card p { margin: 0.25rem 0 0.55rem; font-size: 0.71rem; color: var(--muted); line-height: 1.45; }
+.ach-done { color: var(--good); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; }
+.ach-progress { height: 5px; background: var(--track); border-radius: 3px; overflow: hidden; }
+.ach-progress div { height: 100%; background: var(--accent); }
+.ach-progress small { display: block; margin-top: 0.28rem; font-size: 0.62rem; color: var(--muted); }

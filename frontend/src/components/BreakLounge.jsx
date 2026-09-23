@@ -2,10 +2,10 @@
 import api from "../api";
 
 const BREAK_TYPES = [
-  { kind: "Water", emoji: "💧", minutes: 2, color: "#38bdf8" },
-  { kind: "Stretch", emoji: "🧘", minutes: 3, color: "#d7fe45" },
-  { kind: "Walk", emoji: "🚶", minutes: 5, color: "#fb923c" },
-  { kind: "Breathe", emoji: "🌬️", minutes: 1, color: "#a78bfa" },
+  { kind: "Water", emoji: "\uD83D\uDCA7", minutes: 2, color: "#38bdf8" },
+  { kind: "Stretch", emoji: "\uD83E\uDDD8", minutes: 3, color: "#d7fe45" },
+  { kind: "Walk", emoji: "\uD83D\uDEB6", minutes: 5, color: "#fb923c" },
+  { kind: "Breathe", emoji: "\uD83C\uDF2C\uFE0F", minutes: 1, color: "#a78bfa" },
 ];
 
 export default function BreakLounge({ showToast }) {
@@ -49,6 +49,11 @@ export default function BreakLounge({ showToast }) {
     const id = setTimeout(() => setLeft((l) => l - 1), 1000);
     return () => clearTimeout(id);
   }, [running, left, selected]);
+
+  const startBreak = () => {
+    setLeft(selected.minutes * 60);
+    setRunning(true);
+  };
 
   const today = new Date().toDateString();
   const todayBreaks = breaks.filter(

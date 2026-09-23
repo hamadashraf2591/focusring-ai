@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 import FocusRing from "../components/FocusRing";
 import Hero from "../components/Hero";
 import BreakLounge from "../components/BreakLounge";
+import Achievements from "../components/Achievements";
 import api from "../api";
 
 const QUOTES = [
@@ -24,18 +25,24 @@ const STEPS = [
     num: "Step 1",
     title: "Plan",
     text: "Pick a task and session length. Quick chips make it a two-click start.",
+    cta: "Go to planner",
+    action: "plan",
   },
   {
     img: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=900&q=70",
     num: "Step 2",
     title: "Focus",
     text: "The ring tracks your session while the model watches your risk in real time.",
+    cta: "See how the AI thinks",
+    action: "focus",
   },
   {
     img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=70",
     num: "Step 3",
     title: "Adapt",
     text: "Predictions sharpen with every logged session - breaks land before burnout.",
+    cta: "View your insights",
+    action: "adapt",
   },
 ];
 
@@ -99,6 +106,7 @@ export default function Dashboard() {
   const [sessions, setSessions] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [insights, setInsights] = useState(null);
+  const [ach, setAch] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [active, setActive] = useState(null);
   const [elapsed, setElapsed] = useState(0);
@@ -112,6 +120,8 @@ export default function Dashboard() {
   const [theme, setTheme] = useState(() => localStorage.getItem("fr-theme") || "dark");
   const [time, setTime] = useState(new Date());
   const [zen, setZen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [modelInfo, setModelInfo] = useState(null);
 
   const elapsedRef = useRef(0);
   const onBreakRef = useRef(false);
@@ -139,17 +149,19 @@ export default function Dashboard() {
 
   const refresh = async () => {
     try {
-      const [uRes, sRes, aRes, iRes] = await Promise.all([
+      const [uRes, sRes, aRes, iRes, achRes] = await Promise.all([
         api.get("/users/1"),
         api.get("/users/1/sessions/"),
         api.get("/users/1/analytics/"),
         api.get("/users/1/insights/"),
+        api.get("/users/1/achievements/"),
       ]);
       const n = uRes.data.name.split(" ")[0];
       setUserName(n.charAt(0).toUpperCase() + n.slice(1));
       setSessions(sRes.data);
       setAnalytics(aRes.data);
       setInsights(iRes.data);
+      setAch(achRes.data);
     } catch {
       setError("Failed to load data. Is the backend running on port 8000?");
     }
@@ -211,6 +223,29 @@ export default function Dashboard() {
     const id = setInterval(check, 20000);
     return () => clearInterval(id);
   }, [active]);
+
+  const openAI = () => {
+    setAiOpen(true);
+    if (!modelInfo) {
+      api.get("/model/info").then((r) => setModelInfo(r.data)).catch(() => {});
+    }
+  };
+
+  const handleStep = (action) => {
+    if (action === "plan") {
+      const el = document.getElementById("start-form");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        const input = document.getElementById("task-input");
+        if (input) input.focus();
+      }, 600);
+    } else if (action === "focus") {
+      openAI();
+    } else if (action === "adapt") {
+      const el = document.getElementById("insights");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   const renameUser = async () => {
     const n = prompt("Your name:", userName);
@@ -327,10 +362,12 @@ export default function Dashboard() {
         <div className="nav-links">
           <a href="#how">How it works</a>
           <a href="#lounge">Break Lounge</a>
+          <a href="#achievements">Achievements</a>
           <a href="#analytics">Analytics</a>
         </div>
         <div className="nav-right">
           <span className="clock">{clockStr}</span>
+          <span className="xp-chip"><span className="lvl">LVL {ach ? ach.level : 1}</span></span>
           <div className="streak-chip">
             <Flame />
             {analytics ? analytics.streak_days : 0} day streak
@@ -364,12 +401,19 @@ export default function Dashboard() {
           <h2>How FocusRing works</h2>
           <div className="steps-grid">
             {STEPS.map((s) => (
-              <div className="step-card" key={s.title}>
+              <div
+                className="step-card"
+                key={s.title}
+                onClick={() => handleStep(s.action)}
+                role="button"
+                tabIndex={0}
+              >
                 <img className="step-img" src={s.img} alt={s.title} loading="lazy" />
                 <div className="step-body">
                   <span className="step-num">{s.num}</span>
                   <h3>{s.title}</h3>
                   <p>{s.text}</p>
+                  <span className="step-cta">{s.cta} &rarr;</span>
                 </div>
               </div>
             ))}
@@ -378,11 +422,12 @@ export default function Dashboard() {
 
         {!active ? (
           <div className="grid-2">
-            <form className="card" onSubmit={startSession} style={{ margin: 0 }}>
+            <form className="card" onSubmit={startSession} style={{ margin: 0 }} id="start-form">
               <h2>Start a Focus Session</h2>
               <label>
                 Task name
                 <input
+                  id="task-input"
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                   placeholder="What are you studying?"
@@ -541,7 +586,7 @@ export default function Dashboard() {
 
         {!active ? <BreakLounge showToast={setToast} /> : null}
 
-        <section className="card hide-in-zen">
+        <section className="card hide-in-zen" id="insights">
           <h2>AI Insights</h2>
           <p className="muted" style={{ marginTop: "-0.5rem", fontSize: "0.82rem" }}>
             Generated from your real session history
@@ -555,6 +600,8 @@ export default function Dashboard() {
             ))}
           </div>
         </section>
+
+        <Achievements data={ach} />
 
         <section className="card hide-in-zen" id="analytics">
           <h2>Focus Analytics</h2>
@@ -664,6 +711,7 @@ export default function Dashboard() {
             <h4>Jump to</h4>
             <a href="#how">How it works</a>
             <a href="#lounge">Break Lounge</a>
+            <a href="#achievements">Achievements</a>
             <a href="#analytics">Analytics</a>
           </div>
           <div>
@@ -680,6 +728,50 @@ export default function Dashboard() {
           FocusRing AI - built by Hammad - {new Date().getFullYear()}
         </div>
       </footer>
+
+      {aiOpen ? (
+        <div className="modal-overlay" onClick={() => setAiOpen(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setAiOpen(false)}>{"\u2715"}</button>
+            <h3>How the AI thinks</h3>
+            <p className="muted" style={{ fontSize: "0.88rem" }}>
+              Every session you log trains a model that predicts whether your next
+              session will survive - before you even start it.
+            </p>
+            {modelInfo ? (
+              <div className="metric-row">
+                <div className="metric-box">
+                  <strong>
+                    {modelInfo.accuracy != null ? (modelInfo.accuracy * 100).toFixed(1) + "%" : "-"}
+                  </strong>
+                  <span>Accuracy</span>
+                </div>
+                <div className="metric-box">
+                  <strong>{modelInfo.roc_auc != null ? modelInfo.roc_auc.toFixed(3) : "-"}</strong>
+                  <span>ROC-AUC</span>
+                </div>
+                <div className="metric-box">
+                  <strong>{modelInfo.n_sessions != null ? modelInfo.n_sessions : "-"}</strong>
+                  <span>Sessions trained</span>
+                </div>
+              </div>
+            ) : (
+              <p className="muted">Loading model stats...</p>
+            )}
+            <ul>
+              <li><strong>Plan:</strong> your inputs (session length, time of day) become feature vectors</li>
+              <li><strong>Predict:</strong> logistic regression outputs P(complete) - Focus Risk = 1 - P</li>
+              <li><strong>Adapt:</strong> risk at 65%+ mid-session triggers a break suggestion</li>
+              <li><strong>Learn:</strong> every completed or abandoned session becomes new training data</li>
+            </ul>
+            {modelInfo && modelInfo.source ? (
+              <p className="muted" style={{ fontSize: "0.75rem", marginBottom: 0 }}>
+                Current data source: {modelInfo.source}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       {toast ? <div className="toast">{toast}</div> : null}
     </div>
