@@ -103,3 +103,9 @@ th { color: #8b949e; font-weight: 500; }
 .stat-value { font-size: 1.4rem; font-weight: 700; }
 .stat-label { font-size: 0.78rem; color: #8b949e; margin-top: 0.2rem; }
 .chart-box { margin-top: 1rem; }
+.risk-chip { padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; color: #fff; }
+.risk-chip.low { background: #1a7f37; }
+.risk-chip.moderate { background: #9e6a03; }
+.risk-chip.high { background: #b91c1c; }
+.risk-banner { background: #2d2305; border: 1px solid #9e6a03; border-radius: 10px; padding: 1rem; margin-top: 1rem; }
+.risk-banner p { margin: 0 0 0.75rem; }

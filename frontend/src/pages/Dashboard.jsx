@@ -19,11 +19,23 @@ export default function Dashboard() {
   const [plannedMinutes, setPlannedMinutes] = useState(45);
   const [sessions, setSessions] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [prediction, setPrediction] = useState(null);
   const [active, setActive] = useState(null);
   const [elapsed, setElapsed] = useState(0);
   const [showRating, setShowRating] = useState(false);
+  const [risk, setRisk] = useState(null);
+  const [breakSuggestion, setBreakSuggestion] = useState(null);
+  const [onBreak, setOnBreak] = useState(false);
+  const [breakLeft, setBreakLeft] = useState(0);
   const [error, setError] = useState("");
+
+  const elapsedRef = useRef(0);
+  const onBreakRef = useRef(false);
+  const lastBreakMinuteRef = useRef(0);
   const timerRef = useRef(null);
+
+  useEffect(() => { elapsedRef.current = elapsed; }, [elapsed]);
+  useEffect(() => { onBreakRef.current = onBreak; }, [onBreak]);
 
   const refresh = async () => {
     try {
@@ -41,15 +53,63 @@ export default function Dashboard() {
   useEffect(() => { refresh(); }, []);
 
   useEffect(() => {
-    if (active) {
-      timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
-    }
+    if (active) return;
+    api.get("/users/1/predict/", { params: { planned_minutes: Number(plannedMinutes) } })
+      .then((res) => setPrediction(res.data))
+      .catch(() => {});
+  }, [plannedMinutes, active]);
+
+  useEffect(() => {
+    if (!active) return;
+    timerRef.current = setInterval(() => {
+      if (!onBreakRef.current) setElapsed((e) => e + 1);
+    }, 1000);
     return () => clearInterval(timerRef.current);
+  }, [active]);
+
+  useEffect(() => {
+    if (!onBreak) return;
+    let left = 300;
+    setBreakLeft(left);
+    const id = setInterval(() => {
+      left -= 1;
+      setBreakLeft(left);
+      if (left <= 0) {
+        clearInterval(id);
+        setOnBreak(false);
+        lastBreakMinuteRef.current = Math.max(1, Math.round(elapsedRef.current / 60));
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, [onBreak]);
+
+  useEffect(() => {
+    if (!active) return;
+    const check = async () => {
+      if (onBreakRef.current) return;
+      const minutesSoFar = Math.max(1, Math.round(elapsedRef.current / 60));
+      try {
+        const res = await api.get("/users/1/predict/", {
+          params: { planned_minutes: minutesSoFar },
+        });
+        setRisk(res.data);
+        if (res.data.focus_risk_percent >= 65 && minutesSoFar - lastBreakMinuteRef.current >= 5) {
+          setBreakSuggestion(res.data);
+        }
+      } catch {}
+    };
+    check();
+    const id = setInterval(check, 20000);
+    return () => clearInterval(id);
   }, [active]);
 
   const startSession = async (e) => {
     e.preventDefault();
     setError("");
+    setRisk(null);
+    setBreakSuggestion(null);
+    setOnBreak(false);
+    lastBreakMinuteRef.current = 0;
     try {
       const res = await api.post("/users/1/sessions/", {
         task_name: taskName,
@@ -95,6 +155,16 @@ export default function Dashboard() {
     refresh();
   };
 
+  const acceptBreak = () => {
+    setBreakSuggestion(null);
+    setOnBreak(true);
+  };
+
+  const dismissBreak = () => {
+    setBreakSuggestion(null);
+    lastBreakMinuteRef.current = Math.max(1, Math.round(elapsedRef.current / 60));
+  };
+
   const progress = active
     ? Math.min(100, (elapsed / (active.planned_minutes * 60)) * 100)
     : 0;
@@ -131,8 +201,23 @@ export default function Dashboard() {
               required
             />
           </label>
+          {prediction ? (
+            <p>
+              Predicted focus risk for {plannedMinutes} min now:{" "}
+              <span className={"risk-chip " + prediction.level}>
+                {prediction.focus_risk_percent}%
+              </span>{" "}
+              <span className="muted">? {prediction.recommendation}</span>
+            </p>
+          ) : null}
           <button type="submit" className="primary">Start Focus</button>
         </form>
+      ) : onBreak ? (
+        <div className="card timer-card">
+          <h2>Adaptive Break</h2>
+          <div className="timer">{formatTime(breakLeft)}</div>
+          <p className="muted">Your focus timer is paused. Studying resumes automatically.</p>
+        </div>
       ) : (
         <div className="card timer-card">
           <h2>{active.task_name}</h2>
@@ -141,6 +226,22 @@ export default function Dashboard() {
           <div className="progress-track">
             <div className="progress-fill" style={{ width: progress + "%" }} />
           </div>
+          {breakSuggestion ? (
+            <div className="risk-banner">
+              <p>
+                Focus risk at <strong>{breakSuggestion.focus_risk_percent}%</strong> ?
+                based on your session pattern, a break now would help.
+              </p>
+              <div className="timer-actions">
+                <button className="primary" onClick={acceptBreak}>Take a 5-min break</button>
+                <button onClick={dismissBreak}>Keep going</button>
+              </div>
+            </div>
+          ) : risk ? (
+            <p className="muted">
+              Live focus risk: {risk.focus_risk_percent}% ({risk.level})
+            </p>
+          ) : null}
           {showRating ? (
             <div className="rating">
               <p>How focused were you? (1 = distracted, 5 = deep focus)</p>
