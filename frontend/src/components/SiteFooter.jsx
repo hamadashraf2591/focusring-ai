@@ -1,4 +1,4 @@
-const LINKEDIN_URL = "www.linkedin.com/in/m-hamad-ashraf-4b15a53a9";
+﻿const LINKEDIN_URL = "https://www.linkedin.com/in/m-hamad-ashraf-4b15a53a9";
 
 export default function SiteFooter() {
   return (
@@ -45,3 +45,5 @@ export default function SiteFooter() {
     </footer>
   );
 }
+
+
