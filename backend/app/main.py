@@ -1,10 +1,11 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import engine, Base
+from .database import engine, Base, SessionLocal
+from . import models
 from .routers import users, sessions, analytics, predict, breaks, model_info
 
-app = FastAPI(title="FocusRing AI API", version="0.8.0")
+app = FastAPI(title="FocusRing AI API", version="0.9.0")
 
 _origins = os.getenv(
     "CORS_ORIGINS",
@@ -14,6 +15,7 @@ _origins = os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins.split(","),
+    allow_origin_regex=r"https://.*\.(hf\.space|vercel\.app)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,6 +24,13 @@ app.add_middleware(
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        if not db.query(models.User).first():
+            db.add(models.User(name="Muhammad Hamad Ashraf", email="hammad@focusring.ai"))
+            db.commit()
+    finally:
+        db.close()
 
 app.include_router(users.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
